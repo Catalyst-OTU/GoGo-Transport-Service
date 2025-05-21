@@ -12,7 +12,7 @@ from domains.auth.models.users import User
 from domains.auth.respository.user_account import user_actions
 from domains.auth.models.role_permissions import Role
 from db.init_db import pwd_context
-
+from domains.auth.models.refresh_token import RefreshToken
 
 class PassengerService:
 
@@ -153,6 +153,21 @@ class PassengerService:
         db.commit()
         return get_user
 
+
+    def delete_account_for_passenger(self, db: Session, *, id: UUID4) -> UserSchema:
+        get_passenger = self.repo.get_by_id(db=db, id=id)
+        #delete passenger account first
+        self.repo.delete(db=db, id=id, soft=False)
+
+        get_user = user_actions.get_by_id(db=db, id=get_passenger.user_id)
+
+        #delete user refresh tokens second
+        db.query(RefreshToken).filter(RefreshToken.user_id == get_user.id).delete()
+
+        #delete passenger user account
+        user_actions.delete(db=db, id=get_user.id, soft=False)
+        return get_user
+    
 
 
     def get_Passenger_by_keywords(

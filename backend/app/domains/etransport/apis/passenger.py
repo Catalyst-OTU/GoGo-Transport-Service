@@ -163,3 +163,22 @@ def get_Passenger_profile_by_email(
 ) -> Any:
     Passenger = actions.get_Passenger_profile_by_email(db=db, email=email)
     return Passenger
+
+
+
+
+
+
+
+
+@passengers_router.delete(
+    "/delete-account/{id}",
+    #response_model=schemas.UserSchema
+)
+def delete_account_for_passenger(
+        *, db: Session = Depends(get_db),
+        current_Passenger: Passenger = Depends(get_current_user),
+        id: UUID4
+) -> Any:
+    Passenger = actions.delete_account_for_passenger(db=db, id=id)
+    return "Account deleted successfully"

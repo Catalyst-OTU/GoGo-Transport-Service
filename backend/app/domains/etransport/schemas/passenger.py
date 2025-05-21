@@ -28,7 +28,7 @@ class UpdatePassword(BaseModel):
     password: str
 
 
-class PassengerUpdate(PassengerBase):
+class PassengerUpdate(PassengerRead):
     pass
 
 
