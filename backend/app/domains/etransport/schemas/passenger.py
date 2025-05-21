@@ -4,11 +4,20 @@ from pydantic import BaseModel, EmailStr, BeforeValidator
 from pydantic import UUID4
 from db.schemas import BaseSchema
 from utils.pydantic_validators import check_non_empty_and_not_string
-
+from domains.auth.schemas.user_account import UserSchema
 
 class PassengerBase(BaseModel):
     email: Annotated[EmailStr, BeforeValidator(check_non_empty_and_not_string)]
     full_name: Optional[str] = None
+    phone: Optional[str] = None
+    password: Optional[str] = None
+
+
+
+class PassengerRead(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+
 
 
 class PassengerCreate(PassengerBase):
@@ -23,11 +32,8 @@ class PassengerUpdate(PassengerBase):
     pass
 
 
-class PassengerInDBBase(PassengerBase, BaseSchema):
-    is_active: bool = True
-    failed_login_attempts: Optional[int] = 0
-    account_locked_until: Optional[datetime] = None
-    lock_count: Optional[int] = 0
+class PassengerInDBBase(PassengerRead, BaseSchema):
+    user: Optional[UserSchema]
 
 
 class PassengerSchema(PassengerInDBBase):

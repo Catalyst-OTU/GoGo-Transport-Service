@@ -1,13 +1,13 @@
 # PROJECT DESCRIPTION
 
 ## Ready to set up the project:
-    git clone https://github.com/aiti-kace-devs/Performance-Appraisal-Management-System.git
+    git clone https://github.com/Catalyst-OTU/GoGo-Transport-Service.git
 
 
 
 
 ## NOTE
-> The app will automatically create the database **appraisal_db**
+> The app will automatically create the database **etransport_db**
 
 
 

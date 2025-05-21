@@ -5,168 +5,161 @@ from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import UUID4
 from sqlalchemy.orm import Session
-from sqlalchemy.orm import Session
-from domains.auth.respository.user_account import User
 from config.settings import settings
 from db.session import get_db
 from domains.auth.apis.login import send_reset_email
-from domains.auth.models.users import User
-from domains.auth.schemas import user_account as schemas
+from domains.etransport.models import Passenger
+from domains.etransport.schemas import passenger as schemas
 from domains.auth.schemas.password_reset import ResetPasswordRequest
 from domains.auth.services.password_reset import password_reset_service
-from domains.auth.services.user_account import users_forms_service as actions
-from domains.auth.services.user_account import user_repo
+from domains.etransport.services.passenger import passengers_service as actions
 from services.email_service import Email
-from utils.rbac import check_if_is_system_admin, get_current_user_db
+from utils.rbac import check_if_is_system_admin, get_current_user
 from utils.schemas import HTTPError
 
 
-users_router = APIRouter(
+passengers_router = APIRouter(
+    prefix="/passengers",
     responses={404: {"description": "Not found"}},
 )
 
 
-# @users_router.post("/users/")
-# def create_user(user: schemas.UserCreate, request: Request, db: Session = Depends(get_db)):
+# @passengers_router.post("/Passengers/")
+# def create_Passenger(Passenger: schemas.PassengerCreate, request: Request, db: Session = Depends(get_db)):
 #     schema = request.state.schema
 
 #     if not schema:
 #         raise HTTPException(status_code=400, detail="Schema not found")
 
-#     User.__table__.schema = schema  
+#     Passenger.__table__.schema = schema  
 
-#     new_user = User(**user.dict())
-#     db.add(new_user)
+#     new_Passenger = Passenger(**Passenger.dict())
+#     db.add(new_Passenger)
 #     db.commit()
 
-#     return {"message": "User created successfully in schema " + schema}
+#     return {"message": "Passenger created successfully in schema " + schema}
 
 
-@users_router.get(
+@passengers_router.get(
     "/",
-    response_model=List[schemas.UserSchema]
+    response_model=List[schemas.PassengerSchema]
 )
-def list_users(
+def list_Passengers(
                     *, 
                     db: Session = Depends(get_db),
-                    current_user: User = Depends(check_if_is_system_admin),
+                    current_Passenger: Passenger = Depends(check_if_is_system_admin),
                     skip: int = 0,
                     limit: int = 100,
                     order_by: str = None,
                     order_direction: Literal['asc', 'desc'] = 'asc'
                      ) -> Any:
-    users = actions.list_users(
+    Passengers = actions.list_Passengers(
         db=db, skip=skip, limit=limit, order_by=order_by, order_direction=order_direction
     )
-    return users
+    return Passengers
 
 
 
 
-# @users_router.get(
+# @passengers_router.get(
 #     "/",
-#     response_model=schemas.UserResponse
+#     response_model=schemas.PassengerResponse
 # )
-# @ContentQueryChecker(User.c(), None)
-# def list_users(
+# @ContentQueryChecker(Passenger.c(), None)
+# def list_Passengers(
 #                     *, 
 #                     db: Session = Depends(get_db),
-#                     current_user: User = Depends(check_if_is_system_admin),
+#                     current_Passenger: Passenger = Depends(check_if_is_system_admin),
                     
 #                     request: Request,
 #                      ) -> Any:
-#     users = user_repo.special_read(request, db)
-#     return users
+#     Passengers = Passenger_repo.special_read(request, db)
+#     return Passengers
 
 
-@users_router.post(
+@passengers_router.post(
     "/",
-    response_model=schemas.UserSchema,
+    response_model=schemas.PassengerSchema,
     status_code=status.HTTP_201_CREATED
 )
-def create_user(
+def create_Passenger(
         *,
         #organization_id: UUID4,
-        current_user: User = Depends(check_if_is_system_admin),
-        user_in: schemas.UserCreate,
+        #current_Passenger: Passenger = Depends(get_current_user),
+        Passenger_in: schemas.PassengerCreate,
         db: Session = Depends(get_db)
 ) -> Any:
-    user = actions.create_user(user_in=user_in, db=db)
-    return user
+    Passenger = actions.create_Passenger(Passenger_in=Passenger_in, db=db)
+    return Passenger
 
 
-@users_router.put(
+@passengers_router.put(
     "/{id}",
-    response_model=schemas.UserSchema,
+    response_model=schemas.PassengerSchema,
     responses={status.HTTP_404_NOT_FOUND: {"model": HTTPError}},
 )
-def update_user(
+def update_Passenger(
         *, db: Session = Depends(get_db),
-        current_user: User = Depends(check_if_is_system_admin),
+        current_Passenger: Passenger = Depends(get_current_user),
         id: UUID4,
-        user_in: schemas.UserUpdate,
+        Passenger_in: schemas.PassengerUpdate,
 ) -> Any:
-    user = actions.update_user(db=db, id=id, user_in=user_in)
-    return user
+    Passenger = actions.update_Passenger(db=db, id=id, Passenger_in=Passenger_in)
+    return Passenger
 
 
-@users_router.get(
+@passengers_router.get(
+    "/{id}",
+    response_model=schemas.PassengerSchema
+)
+def get_Passenger(
+        *, db: Session = Depends(get_db),
+        current_Passenger: Passenger = Depends(get_current_user),
+        id: UUID4
+) -> Any:
+    Passenger = actions.get_Passenger(db=db, id=id)
+    return Passenger
+
+
+@passengers_router.delete(
     "/{id}",
     response_model=schemas.UserSchema
 )
-def get_user(
+def block_Passenger(
         *, db: Session = Depends(get_db),
-        current_user: User = Depends(check_if_is_system_admin),
+        current_Passenger: Passenger = Depends(check_if_is_system_admin),
+        id: UUID4,
+        soft_delete: bool
+) -> Any:
+    Passenger = actions.block_Passenger(db=db, id=id, soft_delete=soft_delete)
+    return Passenger
+
+
+
+
+
+@passengers_router.post(
+    "/activate-account/{id}",
+    #response_model=schemas.UserSchema
+)
+def activate_passenger_account(
+        *, db: Session = Depends(get_db),
+        current_Passenger: Passenger = Depends(check_if_is_system_admin),
         id: UUID4
 ) -> Any:
-    user = actions.get_user(db=db, id=id)
-    return user
+    Passenger = actions.activate_passenger_account(db=db, id=id)
+    return "Account activated succesfully"
 
 
-@users_router.delete(
-    "/{id}",
+
+@passengers_router.get(
+    "/user-profile/{email}",
     response_model=schemas.UserSchema
 )
-def delete_user(
+def get_Passenger_profile_by_email(
         *, db: Session = Depends(get_db),
-        current_user: User = Depends(check_if_is_system_admin),
-        id: UUID4
-) -> None:
-    actions.delete_user(db=db, id=id)
-
-
-@users_router.post(
-    "/forgot_password/"
-)
-def request_password_reset(
-        *, db: Session = Depends(get_current_user_db),
-        reset_password_request: ResetPasswordRequest,
-):
-    user = actions.repo.get_by_email(db=db, email=reset_password_request.email, silent=False)
-
-    token = password_reset_service.generate_reset_token()
-    user.reset_password_token = token
-    db.commit()
-
-    reset_link = f"{settings.FRONTEND_URL}/login/resetpassword?token={token}"
-    email_data = send_reset_email(user.username, user.email, reset_link)
-
-    Email.sendMailService(email_data, template_name='forgot-password.html')
-    return JSONResponse(content={"message": "Password reset link has been sent to your email."}, status_code=200)
-
-
-@users_router.put(
-    "/reset_password_token/{token}",
-    response_model=schemas.UserSchema
-)
-def update_user_with_reset_password_token(
-        *, db: Session = Depends(get_current_user_db),
-        token: str,
-        data: schemas.UpdatePassword
-):
-    update_user = actions.repo.get_by_reset_password_token(db=db, token=token)
-    if not update_user: raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Token"
-    )
-    data = actions.repo.update_user_after_reset_password(db=db, db_obj=update_user, data=data)
-    return data
+        current_Passenger: Passenger = Depends(get_current_user),
+        email: str
+) -> Any:
+    Passenger = actions.get_Passenger_profile_by_email(db=db, email=email)
+    return Passenger

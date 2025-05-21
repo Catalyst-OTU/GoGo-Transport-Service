@@ -283,7 +283,7 @@ def log_user_in(
         "refresh_token_expiration": expiration_time,
         "user": {
             "id": user.id,
-            "username": user.username,
+            #"username": user.username,
             "email": user.email,
             "role_id": user.role_id,
             "role": dict(),

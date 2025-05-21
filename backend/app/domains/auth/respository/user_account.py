@@ -1,9 +1,7 @@
 from typing import Dict, Any, Union, Optional
-
 from fastapi.encoders import jsonable_encoder
 from pydantic import UUID4
 from sqlalchemy.orm import Session
-
 from crud.base import CRUDBase, ModelType
 from domains.auth.models.users import User
 from domains.auth.schemas.user_account import (
@@ -20,9 +18,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if exclude_id: query = query.filter(User.id != exclude_id)
         return query.count() > 0
 
-    def get_by_email(self, db: Session, *, email: Any, silent=False) -> Optional[ModelType]:
-        if not email: return None
-        return self.get_by_field(db=db, field="email", value=email, silent=silent)
+    # def get_by_email(self, db: Session, *, email: Any, silent=False) -> Optional[ModelType]:
+    #     if not email: return None
+    #     return self.get_by_field(db=db, field="email", value=email, silent=silent)
+
+
+    def get_by_email(self, db: Session, email: str):
+        return db.query(self.model).filter(self.model.email == email.strip()).first()
+
 
     def get_by_reset_password_token(self, db: Session, token: Any) -> Optional[ModelType]:
         if not token: return None

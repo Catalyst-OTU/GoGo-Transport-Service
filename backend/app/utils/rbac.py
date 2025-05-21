@@ -64,7 +64,7 @@ def check_if_is_system_admin(
         return current_active_user
     
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
-                        detail="only event administrator can access this api route")
+                        detail="only system administrator can access this api route")
 
 
 
