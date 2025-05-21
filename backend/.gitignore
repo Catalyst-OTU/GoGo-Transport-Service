@@ -1,0 +1,10 @@
+*.pyc
+__pycache__
+.env
+postgres-data
+venv
+pgadmin_data
+.vscode
+.history
+.idea
+service_account.json
